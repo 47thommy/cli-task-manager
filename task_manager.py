@@ -1,5 +1,6 @@
 import cmd
 import datetime
+import json
 
 
 class Task:
@@ -50,12 +51,55 @@ class Task:
 class TaskManagerCLI(cmd.Cmd):
     """cli tool to manage tasks"""
 
-    prompt = "TaskMngr>>"
+    prompt = "task-cli>>"
     intro = 'Welcome to TaskManagerCLI. type "help" to see all available commands'
 
-    def do_quit(self):
+    def do_exit(self, line):
         return True
+
+    def do_add(self, description):
+        """adds a task to the json file"""
+
+        # first read the json file if it exists and get the latest id
+        with open("tasks.json", mode="r", encoding="utf-8") as read_file:
+            tasks = json.load(read_file)
+        id = tasks[-1].get("id") + 1
+
+        # create the new task and convert it to dectionary
+        task_dict = Task(id, description).to_dict()
+        # append the new task to the list of tasks
+        tasks.append(task_dict)
+
+        # write to the json file with the updates tasks
+        with open("tasks.json", mode="w", encoding="utf-8") as write_file:
+            json.dump(tasks, write_file)
+
+        print(f"Task {description} added successfully!")
+
+    def do_update(self, arg):
+        """updates the task description"""
+        parts = arg.split(" ", 1)
+        id = int(parts[0])
+        description = parts[1].strip('"')
+
+        with open("tasks.json", mode="r", encoding="utf-8") as read_file:
+            tasks = json.load(read_file)
+        task = Task.from_dict(tasks[id - 1])
+        task.update_description(description)
+        task_dict = task.to_dict()
+        for index, task in enumerate(tasks):
+            if task["id"] == id:
+                tasks[index] = task_dict
+                break
+        print(tasks)
+        with open("tasks.json", mode="w", encoding="utf-8") as write_file:
+            json.dump(tasks, write_file)
+        print(f"Task {id} updated successfully!")
 
     def postcmd(self, stop, line):
         print()  # print new line after each command for better readability
         return stop
+
+
+if __name__ == "__main__":
+    TaskManagerCLI().cmdloop()
