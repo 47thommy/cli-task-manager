@@ -54,6 +54,16 @@ class TaskManagerCLI(cmd.Cmd):
     prompt = "task-cli>>"
     intro = 'Welcome to TaskManagerCLI. type "help" to see all available commands'
 
+    def get_all_tasks(self):
+        """retrieves all tasks from the json file"""
+        with open("tasks.json", mode="r", encoding="utf-8") as read_file:
+            tasks = json.load(read_file)
+        return tasks
+
+    def write_to_json_file(self, tasks):
+        with open("tasks.json", mode="w", encoding="utf-8") as write_file:
+            json.dump(tasks, write_file)
+
     def do_exit(self, line):
         return True
 
@@ -61,8 +71,7 @@ class TaskManagerCLI(cmd.Cmd):
         """adds a task to the json file"""
 
         # first read the json file if it exists and get the latest id
-        with open("tasks.json", mode="r", encoding="utf-8") as read_file:
-            tasks = json.load(read_file)
+        tasks = self.get_all_tasks()
         id = tasks[-1].get("id") + 1
 
         # create the new task and convert it to dectionary
@@ -71,8 +80,7 @@ class TaskManagerCLI(cmd.Cmd):
         tasks.append(task_dict)
 
         # write to the json file with the updates tasks
-        with open("tasks.json", mode="w", encoding="utf-8") as write_file:
-            json.dump(tasks, write_file)
+        self.write_to_json_file(tasks)
 
         print(f"Task {description} added successfully!")
 
@@ -82,8 +90,7 @@ class TaskManagerCLI(cmd.Cmd):
         id = int(parts[0])
         description = parts[1].strip('"')
 
-        with open("tasks.json", mode="r", encoding="utf-8") as read_file:
-            tasks = json.load(read_file)
+        tasks = self.get_all_tasks()
         task = Task.from_dict(tasks[id - 1])
         task.update_description(description)
         task_dict = task.to_dict()
@@ -92,30 +99,26 @@ class TaskManagerCLI(cmd.Cmd):
                 tasks[index] = task_dict
                 break
         print(tasks)
-        with open("tasks.json", mode="w", encoding="utf-8") as write_file:
-            json.dump(tasks, write_file)
+        self.write_to_json_file(tasks)
         print(f"Task {id} updated successfully!")
 
     def do_delete(self, id):
         """deletes a task with the specified id"""
         id = int(id)
-        with open("tasks.json", mode="r", encoding="utf-8") as read_file:
-            tasks = json.load(read_file)
+        tasks = self.get_all_tasks()
         initial_count = len(tasks)
         tasks = [task for task in tasks if task["id"] != id]
         if len(tasks) == initial_count:
             print(f"No task found with id {id}")
             return
-        with open("tasks.json", mode="w", encoding="utf-8") as write_file:
-            json.dump(tasks, write_file)
+        self.write_to_json_file(tasks)
 
         print(f"Task {id} deleted successfully!")
 
     def do_mark_done(self, id):
         """change the status of task with the given id to done"""
         id = int(id)
-        with open("tasks.json", mode="r", encoding="utf-8") as read_file:
-            tasks = json.load(read_file)
+        tasks = self.get_all_tasks()
         for index, task in enumerate(tasks):
             if task["id"] == id:
                 update_task = Task.from_dict(task)
@@ -125,15 +128,13 @@ class TaskManagerCLI(cmd.Cmd):
         else:
             print(f"No task found with ID {id}")
             return
-        with open("tasks.json", mode="w", encoding="utf-8") as write_file:
-            json.dump(tasks, write_file)
+        self.write_to_json_file(tasks)
         print(f"Task:{id} status updated to done")
 
     def do_mark_in_progress(self, id):
         """change the status of task with the given id to in-progress"""
         id = int(id)
-        with open("tasks.json", mode="r", encoding="utf-8") as read_file:
-            tasks = json.load(read_file)
+        tasks = self.get_all_tasks()
 
         for index, task in enumerate(tasks):
             if task["id"] == id:
@@ -145,15 +146,13 @@ class TaskManagerCLI(cmd.Cmd):
             print(f"No task found with ID {id}")
             return
 
-        with open("tasks.json", mode="w", encoding="utf-8") as write_file:
-            json.dump(tasks, write_file)
+        self.write_to_json_file(tasks)
         print(f"Task:{id} status updated to in-progress")
 
     def do_list(self, status):
         """list tasks with the the given status if any, or list all tasks if no status is provided"""
-        with open("tasks.json", mode="r", encoding="utf-8") as read_file:
-            tasks = json.load(read_file)
-        if status not in ["done", "todo", "in-progress"]:
+        tasks = self.get_all_tasks()
+        if status and status not in ["done", "todo", "in-progress"]:
             print(
                 'invalid status, you have to choose between "done", "in-progress","todo"'
             )
