@@ -56,13 +56,27 @@ class TaskManagerCLI(cmd.Cmd):
 
     def get_all_tasks(self):
         """retrieves all tasks from the json file"""
-        with open("tasks.json", mode="r", encoding="utf-8") as read_file:
-            tasks = json.load(read_file)
+        try:
+            with open("tasks.json", mode="r", encoding="utf-8") as read_file:
+                tasks = json.load(read_file)
+        except FileNotFoundError:
+            print("No tasks found. The tasks.json file does not exist.")
+            return
+        except json.JSONDecodeError:
+            print("Error reading tasks. The tasks.json file is corrupted.")
+            return
         return tasks
 
     def write_to_json_file(self, tasks):
-        with open("tasks.json", mode="w", encoding="utf-8") as write_file:
-            json.dump(tasks, write_file)
+        try:
+            with open("tasks.json", mode="w", encoding="utf-8") as write_file:
+                json.dump(tasks, write_file)
+        except FileNotFoundError:
+            print("No tasks found. The tasks.json file does not exist.")
+            return
+        except json.JSONDecodeError:
+            print("Error reading tasks. The tasks.json file is corrupted.")
+            return
 
     def do_exit(self, line):
         return True
