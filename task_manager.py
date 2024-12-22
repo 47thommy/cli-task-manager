@@ -149,9 +149,17 @@ class TaskManagerCLI(cmd.Cmd):
             json.dump(tasks, write_file)
         print(f"Task:{id} status updated to in-progress")
 
-    def do_list(self, line):
+    def do_list(self, arg):
+
         with open("tasks.json", mode="r", encoding="utf-8") as read_file:
             tasks = json.load(read_file)
+        if arg not in ["done", "todo", "in-progress"]:
+            print(
+                'invalid status, you have to choose between "done", "in-progress","todo"'
+            )
+            return
+        if arg:
+            tasks = [task for task in tasks if task["status"] == arg]
         self.format_tasks(tasks)
 
     def format_tasks(self, tasks):
