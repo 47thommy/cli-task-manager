@@ -96,6 +96,21 @@ class TaskManagerCLI(cmd.Cmd):
             json.dump(tasks, write_file)
         print(f"Task {id} updated successfully!")
 
+    def do_delete(self, id):
+        """deletes a task with the specified id"""
+        id = int(id)
+        with open("tasks.json", mode="r", encoding="utf-8") as read_file:
+            tasks = json.load(read_file)
+        initial_count = len(tasks)
+        tasks = [task for task in tasks if task["id"] != id]
+        if len(tasks) == initial_count:
+            print(f"No task found with id {id}")
+            return
+        with open("tasks.json", mode="w", encoding="utf-8") as write_file:
+            json.dump(tasks, write_file)
+
+        print(f"Task {id} deleted successfully!")
+
     def postcmd(self, stop, line):
         print()  # print new line after each command for better readability
         return stop
