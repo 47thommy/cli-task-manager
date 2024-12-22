@@ -149,6 +149,33 @@ class TaskManagerCLI(cmd.Cmd):
             json.dump(tasks, write_file)
         print(f"Task:{id} status updated to in-progress")
 
+    def do_list(self, line):
+        with open("tasks.json", mode="r", encoding="utf-8") as read_file:
+            tasks = json.load(read_file)
+        self.format_tasks(tasks)
+
+    def format_tasks(self, tasks):
+        """Formats a list of tasks into a table-like structure."""
+        if not tasks:
+            print("No tasks available.")
+            return
+
+        # Print table header
+        print(
+            f"{'ID':<5}{'Description':<30}{'Status':<15}{'Created At':<25}{'Updated At':<25}"
+        )
+        print("-" * 100)
+
+        # Print each task
+        for task in tasks:
+            print(
+                f"{task['id']:<5}"
+                f"{task['description']:<30}"
+                f"{task['status']:<15}"
+                f"{task['createdAt']:<25}"
+                f"{task['updatedAt']:<25}"
+            )
+
     def postcmd(self, stop, line):
         print()  # print new line after each command for better readability
         return stop
