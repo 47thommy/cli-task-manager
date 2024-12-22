@@ -111,6 +111,23 @@ class TaskManagerCLI(cmd.Cmd):
 
         print(f"Task {id} deleted successfully!")
 
+    def do_mark_done(self, id):
+        id = int(id)
+        with open("tasks.json", mode="r", encoding="utf-8") as read_file:
+            tasks = json.load(read_file)
+        for index, task in enumerate(tasks):
+            if task["id"] == id:
+                update_task = Task.from_dict(task)
+                update_task.update_status("done")
+                tasks[index] = update_task.to_dict()
+                break
+        else:
+            print(f"No task found with ID {id}")
+            return
+        with open("tasks.json", mode="w", encoding="utf-8") as write_file:
+            json.dump(tasks, write_file)
+        print(f"Task:{id} status updated to done")
+
     def postcmd(self, stop, line):
         print()  # print new line after each command for better readability
         return stop
