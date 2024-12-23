@@ -36,10 +36,8 @@ Each task has the following properties:
    ```
 
 3. Ensure python is installed.
-
-4. Make the CLI executable (if applicable):
-   ```bash
-   chmod +x task-cli
+   ```
+   python task_manager.py
    ```
 
 ## Usage
@@ -83,25 +81,25 @@ Task deleted successfully
 ### Mark a Task as In Progress
 
 ```bash
-task-cli mark-in-progress <task-id>
+task-cli mark_in_progress <task-id>
 ```
 
 Output:
 
 ```
-Task marked as in-progress
+Task status updated to in-progress
 ```
 
 ### Mark a Task as Done
 
 ```bash
-task-cli mark-done <task-id>
+task-cli mark_done <task-id>
 ```
 
 Output:
 
 ```
-Task marked as done
+Task status updated to done done
 ```
 
 ### List All Tasks
