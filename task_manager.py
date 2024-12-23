@@ -54,6 +54,9 @@ class TaskManagerCLI(cmd.Cmd):
     prompt = "task-cli>>"
     intro = 'Welcome to TaskManagerCLI. type "help" to see all available commands'
 
+    def get_next_id(self, tasks):
+        return max((task["id"] for task in tasks), default=0) + 1
+
     def get_all_tasks(self):
         """retrieves all tasks from the json file"""
         try:
@@ -64,6 +67,9 @@ class TaskManagerCLI(cmd.Cmd):
             return
         except json.JSONDecodeError:
             print("Error reading tasks. The tasks.json file is corrupted.")
+            return
+        except Exception as e:
+            print(f"unexpected error occurred: {e}")
             return
         return tasks
 
@@ -86,7 +92,7 @@ class TaskManagerCLI(cmd.Cmd):
 
         # first read the json file if it exists and get the latest id
         tasks = self.get_all_tasks()
-        id = tasks[-1].get("id") + 1
+        id = self.get_next_id(tasks)
 
         # create the new task and convert it to dectionary
         task_dict = Task(id, description).to_dict()
@@ -181,13 +187,11 @@ class TaskManagerCLI(cmd.Cmd):
             print("No tasks available.")
             return
 
-        # Print table header
         print(
             f"{'ID':<5}{'Description':<30}{'Status':<15}{'Created At':<25}{'Updated At':<25}"
         )
         print("-" * 100)
 
-        # Print each task
         for task in tasks:
             print(
                 f"{task['id']:<5}"
