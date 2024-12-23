@@ -111,14 +111,16 @@ class TaskManagerCLI(cmd.Cmd):
         description = parts[1].strip('"')
 
         tasks = self.get_all_tasks()
-        task = Task.from_dict(tasks[id - 1])
+        task = next((task for task in tasks if task["id"] == id), None)
+        if not task:
+            print(f"No task found with ID {id}")
+        task = Task.from_dict(task)
         task.update_description(description)
         task_dict = task.to_dict()
         for index, task in enumerate(tasks):
             if task["id"] == id:
                 tasks[index] = task_dict
                 break
-        print(tasks)
         self.write_to_json_file(tasks)
         print(f"Task {id} updated successfully!")
 
